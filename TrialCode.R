@@ -1,4 +1,5 @@
 library(remotes)
+#install.packages("remotes") when esri2sf not working 
 #install_github("yonghah/esri2sf")
 library(esri2sf)
 library(ggplot2)
@@ -52,19 +53,23 @@ p + geom_dotplot(binaxis='y', stackdir='center', dotsize=1)
 p + geom_jitter(shape=16, position=position_jitter(0.2))
 
 
-p <- ggplot(ToothGrowth, aes(x=dose, y=len)) + 
-  geom_boxplot()
-p
+energy_building_metadata$BUILDINGTY = as.factor(energy_building_metadata$BUILDINGTY)
+q <- ggplot(energy_building_metadata, aes(x=BUILDINGTY, y=WattHours)) + 
+  geom_boxplot() + geom_jitter(shape=16, position=position_jitter(0.2))
+
+q
 # Rotate the box plot
-p + coord_flip()
+q + coord_flip()
 # Notched box plot
-ggplot(energy_building_metadata, aes(x=BUILDINGTY, y=WattHours)) + 
+q <- ggplot(energy_building_metadata, aes(x=BUILDINGTY, y=WattHours)) + 
   geom_boxplot(notch=TRUE)
 # Change outlier, color, shape and size
-ggplot(ToothGrowth, aes(x=dose, y=len)) + 
+ggplot(energy_building_metadata, aes(x=BUILDINGTY, y=WattHours)) + 
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                outlier.size=4)
-p + geom_dotplot(binaxis='y', stackdir='center', dotsize=1)
+q + geom_dotplot(binaxis='y', stackdir='center', dotsize=1)
 # Box plot with jittered points
 # 0.2 : degree of jitter in x direction
-p + geom_jitter(shape=16, position=position_jitter(0.2))
+q + geom_jitter(shape=16, position=position_jitter(0.2))
+
+

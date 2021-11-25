@@ -26,17 +26,29 @@ energy_building_metadata <- merge(sample_energy_df, bldng_metadata, by="BUILDING
 # demoing group support in the `choices` arg
 shinyApp(
   ui = fluidPage(
-    selectizeInput('BUILDINGID', 'Select BUILDINGID', choices = c("choose" = "", unique(sample_energy_df$BUILDINGID))),
-    
+    sidebarLayout(
+      sidebarPanel(
+        #radio to select by buildingID
+        selectizeInput('BUILDINGID', 'Select BUILDINGID', choices = c("choose" = "", unique(sample_energy_df$BUILDINGID))),
+      ), 
+      mainPanel(
+        plotOutput("ts_plot"),
+        plotOutput("ts_plot_line"),
+      )
+    ),
+    #radio to select by buildingID
+    #selectizeInput('BUILDINGID', 'Select BUILDINGID', choices = c("choose" = "", unique(sample_energy_df$BUILDINGID))),
+    #slider to select buildings by yearbuilt 
     sliderInput("YEARBUILT", "Year Built:", 1800, max(energy_building_metadata$YEARBUILT), value = c(1875,1940)),
+    #radio group to select buildings by their building type
+    checkboxGroupInput("BTYPES", "Building Types:", unique(energy_building_metadata$BUILDINGTY), selected =unique(energy_building_metadata$BUILDINGTY)),
+    #radio to select by BUILDINGTY
+    selectizeInput('BUILDINGTY', 'Select BUILDINGTY', choices = c("choose" = "", unique(energy_building_metadata$BUILDINGTY))),
     
-    checkboxGroupInput("BTYPES", "Building Types:",
-                       unique(energy_building_metadata$BUILDINGTY), selected =unique(energy_building_metadata$BUILDINGTY)),
     mainPanel(
-      plotOutput("ts_plot"),
-      plotOutput("ts_plot_line"),
       plotOutput("btype_avg_wh"),
-      plotOutput("scatter_plot_year")
+      plotOutput("scatter_plot_year"),
+      plotOutput("boxplot_btype"),
       #tableOutput("table")
     )
   ),
@@ -47,6 +59,9 @@ shinyApp(
     })
     filter_BTYPE <- reactive({
       energy_building_metadata %>% filter(BUILDINGTY == input$BTYPES)
+    })
+    filter_BTYPE_group <- reactive({
+      energy_building_metadata %>% filter(BUILDINGTY == input$BUILDINGTY)
     })
     filter_year_built <- reactive({
       energy_building_metadata %>% filter(YEARBUILT > input$YEARBUILT[1], YEARBUILT < input$YEARBUILT[2])
@@ -89,6 +104,13 @@ shinyApp(
       # A basic scatterplot with color depending on Species
       ggplot(energy_building_metadata, aes(x=YEARBUILT, y=WattHours, color=BUILDINGTY)) + 
         geom_point(size=2) 
+    })
+    
+    output$boxplot_btype <- renderPlot({
+      energy_building_metadata <- filter_BTYPE_group()
+      ggplot(energy_building_metadata, aes(x=BUILDINGTY, y=WattHours)) + 
+      geom_boxplot() + geom_jitter(shape=16, position=position_jitter(0.2))
+      
     })
     
     output$table <- renderTable({
