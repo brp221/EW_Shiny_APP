@@ -38,12 +38,15 @@ ui <- dashboardPage(
       # First tab content
       tabItem(tabName = "dashboard",
               fluidRow(
-                box(plotOutput("ts_plot", height = 250)),
+                box(
+                  title= textOutput('ts_BID_title'),
+                  plotOutput("ts_plot", height = 250)
+                ),
                 
                 box(
                   title= "Controls",
                   #radio to select by buildingID
-                  selectizeInput('BUILDINGID', 'Select BUILDINGID', choices = c("choose" = "", unique(sample_energy_df$BUILDINGID))),
+                  selectizeInput('BUILDINGID', 'Select BUILDINGID', choices = c("choose" = "", unique(sample_energy_df$BUILDINGID)),selected= "0019"),
                 )
               )
       ),
@@ -83,7 +86,7 @@ ui <- dashboardPage(
                   title= "Controls",
                   #radio to select by BUILDINGTY
                   selectizeInput('BUILDINGTY', 'Select BUILDINGTY', choices = c("choose" = "", unique(energy_building_metadata$BUILDINGTY))),
-                  actionButton("Filter_0", "Filter 0 Values"),
+                  actionButton("Filter_0s", "Filter 0 Values"),
                   )
               )
       )
@@ -104,8 +107,8 @@ server <- function(input, output) {
   filter_BTYPE_group <- reactive({
     energy_building_metadata %>% filter(BUILDINGTY == input$BUILDINGTY)
   })
-  filter_0_vals <- eventReactive(input$go, {
-    energy_building_metadata %>% filter(WattHours != 0)
+  filter_0_vals <- eventReactive(input$Filter_0s, {
+    energy_building_metadata %>% filter(WattHours != 0,BUILDINGTY == input$BUILDINGTY )
     #runif(input$BUILDINGTY)
   })
   # plot time series
@@ -114,6 +117,9 @@ server <- function(input, output) {
     ggplot(energy_building_metadata, aes(x = time, y=WattHours)) + geom_area()
     #+ scale_x_date(date_labels = "%b %Y")
   })
+  #dynamically changing title of the ts plot based on BID value
+  output$ts_BID_title <- renderText(bldng_metadata_all$SHORTNAME[bldng_metadata_all==input$BUILDINGID])
+  
   output$scatter_plot_year <- renderPlot({
     energy_building_metadata <- filter_year_built()
     sum_watts_date_range <- energy_building_metadata %>% group_by(BUILDINGID)%>% summarise(WattHours = mean(WattHours))
