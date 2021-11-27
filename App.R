@@ -7,9 +7,15 @@ library(remotes)
 install_github("yonghah/esri2sf", force = 'TRUE')
 library(esri2sf)
 library(shinydashboard)
+library(arcgisbinding)
+
 #setwd("C:/Users/p99br/Desktop/CSE281/EW_Shiny_App/")
 setwd("/Users/bratislavpetkovic/Desktop/CSE_COURSES/CSE281/EW_Shiny_App/")
 
+arc.check_product()
+
+test <- arc.data2sf(arc.select(arc.open(
+  "https://services1.arcgis.com/sdfkjh234uwrhfs/arcgis/rest/services/service_b2348hwiskhgh4578kjsi45iuskhs/FeatureServer/0")))
 
 #energy data frame(s)
 #energy_df <- read.csv("AnnualData.csv")
@@ -23,6 +29,10 @@ bldng_metadata_all <- esri2sf(
 bldng_metadata <- bldng_metadata_all[, c("BUILDINGID", "BUILDINGTY", "GROSSAREA","NETAREA", "YEARBUILT",  "Shape__Area")]
 
 energy_building_metadata <- merge(sample_energy_df, bldng_metadata, by="BUILDINGID" )
+
+energy_build_data <- esri2sf(
+  "https://services.arcgis.com/VXxCfMpXUKuFKFvE/arcgis/rest/services/Initium/FeatureServer/0"
+)
 
 # demoing group support in the `choices` arg
 ui <- dashboardPage(
@@ -118,7 +128,7 @@ server <- function(input, output) {
     #+ scale_x_date(date_labels = "%b %Y")
   })
   #dynamically changing title of the ts plot based on BID value
-  output$ts_BID_title <- renderText(bldng_metadata_all$SHORTNAME[bldng_metadata_all==input$BUILDINGID])
+  output$ts_BID_title <- renderText(bldng_metadata_all$SHORTNAME[bldng_metadata_all$BUILDINGID==input$BUILDINGID])
   
   output$scatter_plot_year <- renderPlot({
     energy_building_metadata <- filter_year_built()
