@@ -17,7 +17,7 @@ setwd("C:/Users/p99br/Desktop/CSE281/EW_Shiny_App/")
 arc.check_product()
 
 # energy dataframes 
-originis <- arc.select(arc.open("C:/Users/p99br/Desktop/CSE281/EW_Shiny_APP/EW_Shiny_App/EW_Shiny_App.gdb/Originis"))
+#originis <- arc.select(arc.open("C:/Users/p99br/Desktop/CSE281/EW_Shiny_APP/EW_Shiny_App/EW_Shiny_App.gdb/Originis"))
 initium <- arc.select(arc.open("C:/Users/p99br/Desktop/CSE281/EW_Shiny_APP/EW_Shiny_App/EW_Shiny_App.gdb/Initium"))
 sample_energy_df <- read.csv("sampleEnergyData.csv")
 #https://services.arcgis.com/VXxCfMpXUKuFKFvE/arcgis/rest/services/Initium/FeatureServer/0
